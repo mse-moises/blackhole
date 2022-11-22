@@ -1,4 +1,5 @@
-import 'package:blackhole/pages/home_page/home_page.dart';
+import 'package:blackhole/view/pages/create_transaction_page/create_transaction_page.dart';
+import 'package:blackhole/view/pages/home_page/home_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,7 +17,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.indigo,
       ),
-      home: const HomePage(),
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        HomePage.route: (context) => const HomePage(),
+        // When navigating to the "/second" route, build the SecondScreen widget.
+        CreateTransactionPage.route: (context) => const CreateTransactionPage(),
+      },
     );
   }
 }

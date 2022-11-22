@@ -1,0 +1,5 @@
+const SMALL_SPACE = 4.0;
+const MEDIUM_SPACE = 8.0;
+const LARGE_SPACE = 16.0;
+
+const CONST_BORDER_RADIUS_BUTTON_CHIP = 16.0;
