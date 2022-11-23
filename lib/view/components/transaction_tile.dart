@@ -1,5 +1,6 @@
 import 'package:blackhole/const/const_theme.dart';
 import 'package:blackhole/models/transaction_model.dart';
+import 'package:blackhole/view/components/buttom_tag_more.dart';
 import 'package:blackhole/view/components/button_tag_component.dart';
 import 'package:blackhole/view/components/tag_component.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class TransactionTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           if (transactionModel.tags.length > 1) ...[
-            ButtonTagComponent(label: "..."),
+            ButtonTagMore(),
             const SizedBox(
               width: SMALL_SPACE,
             ),

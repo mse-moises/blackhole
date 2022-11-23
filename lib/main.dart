@@ -1,3 +1,4 @@
+import 'package:blackhole/const/const_theme.dart';
 import 'package:blackhole/view/pages/create_transaction_page/create_transaction_page.dart';
 import 'package:blackhole/view/pages/home_page/home_page.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,9 @@ class MyApp extends StatelessWidget {
       title: 'BlackHole - Wallet Manager',
       theme: ThemeData(
         primarySwatch: Colors.indigo,
+        // textTheme: TextTheme(
+        //   headline2: CONST_H2_THEME,
+        // ),
       ),
       initialRoute: '/',
       routes: {

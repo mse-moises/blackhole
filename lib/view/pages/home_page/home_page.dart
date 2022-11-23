@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
           centerTitle: true,
           title: const Text("Home"),
         ),
-        floatingActionButton: _FloatingActionButton(),
+        floatingActionButton: const _FloatingActionButton(),
         body: const SafeArea(
           child: _HomeBody(),
         ),

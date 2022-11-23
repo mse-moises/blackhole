@@ -7,7 +7,7 @@ part 'home_page_event.dart';
 part 'home_page_state.dart';
 
 class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
-  HomePageBloc() : super(HomePageInitialState()) {
+  HomePageBloc() : super(HomePageLoading()) {
     on<HomePageEvent>(
       (event, emit) async {
         if (event is HomePageRequestLoad) {
