@@ -1,7 +1,13 @@
+import 'package:blackhole/const/const_business_rules.dart';
 import 'package:blackhole/const/const_theme.dart';
 import 'package:blackhole/injection_container.dart';
 import 'package:blackhole/models/tag_model.dart';
+import 'package:blackhole/tools/converters.dart';
+import 'package:blackhole/tools/validate.dart';
 import 'package:blackhole/view/components/button_tag_component.dart';
+import 'package:blackhole/view/components/radio_button/bloc/radio_button_group_controller_bloc.dart';
+import 'package:blackhole/view/components/radio_button/radio_button.dart';
+import 'package:blackhole/view/components/radio_button/radio_group_button.dart';
 import 'package:blackhole/view/components/tag_component.dart';
 import 'package:blackhole/view/components/text_field_money.dart';
 import 'package:blackhole/view/pages/create_transaction_page/bloc/create_transaction_bloc.dart';
@@ -14,51 +20,102 @@ class CreateTransactionPage extends StatelessWidget {
   CreateTransactionPage({Key? key}) : super(key: key);
 
   final CreateTransactionBloc bloc = getIt.get<CreateTransactionBloc>();
-
   final _formKey = GlobalKey<FormState>();
+  final radioGroupController = RadioButtonGroupControllerBloc();
+
+  void removeTag(TagModel tagModel) {
+    bloc.add(CreateTransactionRequestRemoveTag(tagModel));
+  }
+
+  void addTag(TagModel tagModel) {
+    bloc.add(CreateTransactionRequestAddTag(tagModel));
+  }
+
+  void updateValue(String valueString) {
+    double value = Converters.moneyStringToDouble(valueString);
+    bloc.add(CreateTransactionRequestUpdateValue(value: value));
+  }
+
+  void updateObservation(String observation) {
+    bloc.add(
+      CreateTransactionRequestUpdateObservation(
+        observation: observation,
+      ),
+    );
+  }
+
+  void saveTransaction() {
+    if (!Validator.isFormValid(_formKey)) {
+      return;
+    }
+
+    bloc.add(CreateTransactionRequestSaveTransaction());
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: bloc,
-      child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text("New transaction"),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Container(
-                margin: const EdgeInsets.all(MEDIUM_SPACE),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _FieldTitle(
-                      title: "value",
+      child: BlocBuilder<CreateTransactionBloc, CreateTransactionState>(
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text("new transaction"),
+            ),
+            floatingActionButton: _FloatingActionButtonSend(
+              onPressed: saveTransaction,
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Container(
+                    margin: const EdgeInsets.all(ThemeConstant.mediumSpace),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _FieldTitle(
+                          title: "type",
+                        ),
+                        _FieldWithPadding(
+                          child: _TransactionType(controller: radioGroupController,),
+                        ),
+                        _FieldTitle(
+                          title: "value",
+                        ),
+                        _FieldWithPadding(
+                          child: TextFieldMoney(
+                            validator: Validator.validateMoneyForm,
+                            onChange: updateValue,
+                          ),
+                        ),
+                        const _FieldTitle(
+                          title: "observation",
+                        ),
+                        _FieldWithPadding(
+                          child: TextFormField(
+                            validator: Validator.validateObservationForm,
+                            onChanged: updateObservation,
+                          ),
+                        ),
+                        const _FieldTitle(
+                          title: "tags",
+                        ),
+                        _FieldWithPadding(
+                          child: _TagsField(
+                            removeTag: removeTag,
+                            addTag: addTag,
+                          ),
+                        ),
+                      ],
                     ),
-                    _FieldWithPadding(
-                      child: TextFieldMoney(),
-                    ),
-                    _FieldTitle(
-                      title: "observation",
-                    ),
-                    _FieldWithPadding(
-                      child: TextFormField(),
-                    ),
-                    _FieldTitle(
-                      title: "tags",
-                    ),
-                    _FieldWithPadding(
-                      child: _TagsField(),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -75,7 +132,7 @@ class _FieldTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: MEDIUM_SPACE),
+      padding: const EdgeInsets.only(left: ThemeConstant.mediumSpace),
       child: Text(
         title,
         style: Theme.of(context).textTheme.headline4,
@@ -93,9 +150,9 @@ class _FieldWithPadding extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-        left: LARGE_SPACE,
-        top: MEDIUM_SPACE,
-        bottom: LARGE_SPACE,
+        left: ThemeConstant.largeSpace,
+        top: ThemeConstant.mediumSpace,
+        bottom: ThemeConstant.largeSpace,
       ),
       child: child,
     );
@@ -103,16 +160,27 @@ class _FieldWithPadding extends StatelessWidget {
 }
 
 class _TagsField extends StatelessWidget {
-  const _TagsField({Key? key}) : super(key: key);
+  const _TagsField({
+    Key? key,
+    required this.removeTag,
+    required this.addTag,
+  }) : super(key: key);
+
+  final Function removeTag;
+  final Function addTag;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: LARGE_SPACE),
+      margin: const EdgeInsets.only(
+        right: ThemeConstant.largeSpace,
+      ),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: const BorderRadius.all(
-          Radius.circular(LARGE_SPACE),
+          Radius.circular(
+            ThemeConstant.largeSpace,
+          ),
         ),
       ),
       child: Center(
@@ -122,15 +190,22 @@ class _TagsField extends StatelessWidget {
               return Column(
                 children: [
                   _TagsSelector(
+                    removeTag: removeTag,
+                    addTag: addTag,
                     selectedTags: state.selectedTags,
                     allTags: state.allTags,
                   ),
                 ],
               );
             }
-            return Container(
-              height: CONST_TAG_SELECTOR_BOX_WEIGHT,
-              child: const CircularProgressIndicator(),
+            return const SizedBox(
+              height: ThemeConstant.tagSelectorBoxWeight,
+              width: ThemeConstant.tagSelectorBoxWeight,
+              child: SizedBox(
+                height: ThemeConstant.largeSpace,
+                width: ThemeConstant.largeSpace,
+                child: CircularProgressIndicator(),
+              ),
             );
           },
         ),
@@ -144,66 +219,71 @@ class _TagsSelector extends StatelessWidget {
     Key? key,
     required this.selectedTags,
     required this.allTags,
+    required this.removeTag,
+    required this.addTag,
   }) : super(key: key);
+
+  final Function removeTag;
+  final Function addTag;
 
   final List<TagModel> selectedTags;
   final List<TagModel> allTags;
 
   final bloc = getIt.get<CreateTransactionBloc>();
 
-  void removeTag(TagModel tagModel) {
-    bloc.add(CreateTransactionRequestRemoveTag(tagModel));
-  }
-
-  void addTag(TagModel tagModel) {
-    bloc.add(CreateTransactionRequestAddTag(tagModel));
-  }
-
   @override
   Widget build(BuildContext context) {
     final headline6 = Theme.of(context).textTheme.headline6;
     return Container(
-      padding: const EdgeInsets.all(SMALL_SPACE),
-      margin: const EdgeInsets.all(SMALL_SPACE),
+      padding: const EdgeInsets.all(
+        ThemeConstant.smallSpace,
+      ),
+      margin: const EdgeInsets.all(
+        ThemeConstant.smallSpace,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "Selected",
+            "selected",
             style: headline6,
           ),
-          SizedBox(
-            height: MEDIUM_SPACE,
+          const SizedBox(
+            height: ThemeConstant.mediumSpace,
           ),
           Wrap(
             alignment: WrapAlignment.start,
-            runSpacing: MEDIUM_SPACE,
-            spacing: MEDIUM_SPACE,
+            runSpacing: ThemeConstant.mediumSpace,
+            spacing: ThemeConstant.mediumSpace,
             children: selectedTags
                 .map(
                   (tagModel) => ButtonTagComponent(
+                    toAdd: false,
                     onTap: () => removeTag(tagModel),
                     label: tagModel.label,
+                    isFirstTag: tagModel == selectedTags.first,
                   ),
                 )
                 .toList(),
           ),
-          Divider(),
+          const Divider(),
           Text(
-            "All tags",
+            "all tags",
             style: headline6,
           ),
-          SizedBox(
-            height: MEDIUM_SPACE,
+          const SizedBox(
+            height: ThemeConstant.mediumSpace,
           ),
           Wrap(
             alignment: WrapAlignment.start,
-            runSpacing: MEDIUM_SPACE,
-            spacing: MEDIUM_SPACE,
+            runSpacing: ThemeConstant.mediumSpace,
+            spacing: ThemeConstant.mediumSpace,
             children: allTags
                 .map(
                   (tagModel) => ButtonTagComponent(
+                    toAdd: true,
+                    isFirstTag: false,
                     label: tagModel.label,
                     onTap: () => addTag(tagModel),
                   ),
@@ -213,5 +293,61 @@ class _TagsSelector extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _FloatingActionButtonSend extends StatelessWidget {
+  const _FloatingActionButtonSend({Key? key, required this.onPressed})
+      : super(key: key);
+
+  final void Function()? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CreateTransactionBloc, CreateTransactionState>(
+      builder: (context, state) {
+        bool isValid =
+            (state is CreateTransactionWithTags) && state.isTransacionValid;
+
+        return FloatingActionButton.extended(
+          heroTag: 'FloatingActionButton',
+          label: Row(
+            children: [
+              Text('Save'),
+              SizedBox(
+                width: ThemeConstant.smallSpace,
+              ),
+              Icon(Icons.save),
+            ],
+          ),
+          onPressed: onPressed,
+        );
+      },
+    );
+  }
+}
+
+class _TransactionType extends StatelessWidget {
+  const _TransactionType({Key? key, required this.controller}) : super(key: key);
+
+  final RadioButtonGroupControllerBloc controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      RadioButtonGroup(
+        controller: controller,
+        radioButtonList: [
+          RadioButton(
+            value: TransactionTypes.moneyIn,
+            title: "in",
+          ),
+          RadioButton(
+            value: TransactionTypes.moneyOut,
+            title: "out",
+          ),
+        ],
+      ),
+    ]);
   }
 }

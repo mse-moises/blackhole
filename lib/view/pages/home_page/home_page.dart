@@ -43,6 +43,7 @@ class _FloatingActionButton extends StatelessWidget {
       builder: (context, state) {
         if (state is HomePageLoaded) {
           return FloatingActionButton(
+            heroTag: 'FloatingActionButton',
             onPressed: () =>
                 Navigator.pushNamed(context, CreateTransactionPage.route),
             child: const Icon(Icons.add),

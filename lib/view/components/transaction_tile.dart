@@ -26,7 +26,7 @@ class TransactionTile extends StatelessWidget {
           if (transactionModel.tags.length > 1) ...[
             ButtonTagMore(),
             const SizedBox(
-              width: SMALL_SPACE,
+              width: ThemeConstant.smallSpace,
             ),
           ],
           TagComponent(label: transactionModel.primaryTag.label),

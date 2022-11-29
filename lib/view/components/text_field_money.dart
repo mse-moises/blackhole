@@ -3,7 +3,16 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:flutter/material.dart';
 
 class TextFieldMoney extends StatelessWidget {
-  const TextFieldMoney({Key? key}) : super(key: key);
+  const TextFieldMoney({
+    Key? key,
+    this.onChange,
+    this.controller,
+    this.validator,
+  }) : super(key: key);
+
+  final String? Function(String?)? validator;
+  final void Function(String)? onChange;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -12,22 +21,22 @@ class TextFieldMoney extends StatelessWidget {
       children: [
         const Text(
           "R\$",
-          style: CONST_MONEY_SIMPLE_TEXT,
+          style: ThemeConstant.moneySimpleText,
         ), //TODO: internacionalizate
-        // TextField(
-        //   inputFormatters: [
-        //     CurrencyTextInputFormatter(symbol: ""),
-        //   ],
-        //   keyboardType: TextInputType.number,
-        //   decoration: CONST_MONEY_SIMPLE_DECORATION,
-        // ),
+        SizedBox(
+          width: ThemeConstant.smallSpace,
+        ),
         Expanded(
-          child: TextField(
+          child: TextFormField(
+            validator: validator,
+            style: ThemeConstant.moneySimpleText,
+            onChanged: onChange,
+            controller: controller,
             inputFormatters: [
               CurrencyTextInputFormatter(symbol: ""),
             ],
             keyboardType: TextInputType.number,
-            decoration: CONST_MONEY_SIMPLE_DECORATION,
+            //decoration: ThemeConstant.moneySimpleDecoration,
           ),
         ),
       ],

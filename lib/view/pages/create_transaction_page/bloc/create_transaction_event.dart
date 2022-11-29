@@ -17,5 +17,20 @@ class CreateTransactionRequestRemoveTag implements CreateTransactionEvent {
   CreateTransactionRequestRemoveTag(this.tagModelToRemove);
 }
 
-
 class CreateTransactionRequestChangeState implements CreateTransactionEvent {}
+
+class CreateTransactionRequestUpdateValue implements CreateTransactionEvent {
+  final double value;
+
+  CreateTransactionRequestUpdateValue({required this.value});
+}
+
+class CreateTransactionRequestUpdateObservation
+    implements CreateTransactionEvent {
+  final String observation;
+
+  CreateTransactionRequestUpdateObservation({required this.observation});
+}
+
+class CreateTransactionRequestSaveTransaction
+    implements CreateTransactionEvent {}

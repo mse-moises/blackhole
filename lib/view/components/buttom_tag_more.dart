@@ -16,7 +16,9 @@ class ButtonTagMore extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(CONST_BORDER_RADIUS_BUTTON_TAG),
+            borderRadius: BorderRadius.circular(
+              ThemeConstant.borderRadiusButtonTag,
+            ),
           ),
           child: const Icon(
             Icons.more_horiz,
