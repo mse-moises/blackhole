@@ -1,19 +1,25 @@
 part of 'create_transaction_bloc.dart';
 
 @immutable
-abstract class CreateTransactionState {}
+abstract class CreateTransactionState {
+  String? typeValidation;
+  String? tagValidation;
+}
 
 class CreateTransactionInitialWithoutTags extends CreateTransactionState {}
 
 class CreateTransactionWithTags extends CreateTransactionState {
-  bool isTransacionValid;
   final List<TagModel> selectedTags;
   final List<TagModel> allTags;
+
+  final String? typeValidation;
+  final String? tagValidation;
 
   CreateTransactionWithTags({
     required this.allTags,
     required this.selectedTags,
-    required this.isTransacionValid,
+    this.typeValidation,
+    this.tagValidation,
   });
 }
 

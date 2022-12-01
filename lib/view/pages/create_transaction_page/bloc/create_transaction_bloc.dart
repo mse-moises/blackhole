@@ -1,3 +1,4 @@
+import 'package:blackhole/const/const_business_rules.dart';
 import 'package:blackhole/mock/mock_list.dart';
 import 'package:blackhole/models/tag_model.dart';
 import 'package:blackhole/models/transaction_model.dart';
@@ -12,10 +13,17 @@ part 'create_transaction_state.dart';
 class CreateTransactionBloc
     extends Bloc<CreateTransactionEvent, CreateTransactionState> {
 
+
+
   final List<TagModel> selectedTags = [];
   double value = 0.0;
-  late String observation;
+  String? observation;
 
+  TransactionTypes? transactionType;
+
+  bool get isTransactionValid {
+    return getTypeValidation() == null && getTagsValidation() == null;
+  }
 
   CreateTransactionBloc() : super(CreateTransactionInitialWithoutTags()) {
     on<CreateTransactionEvent>((event, emit) async {
@@ -43,6 +51,10 @@ class CreateTransactionBloc
         emit(updateObservation(event.observation));
       }
 
+      if (event is CreateTransactionRequestUpdateTransactionType){
+        emit(updateTransactionType(event.transactionType));
+      }
+
       if (event is CreateTransactionRequestSaveTransaction) {
         emit(saveTransaction());
       }
@@ -51,28 +63,20 @@ class CreateTransactionBloc
     add(CreateTransactionRequestLoadTags());
   }
 
-  bool get isTransacionValid {
+  bool get isTransacionValueValid {
     return value > 0.0;
   }
 
   Future<CreateTransactionState> getAllTags() async {
     //mock
     await Future.delayed(Duration(seconds: 1));
-    return CreateTransactionWithTags(
-      isTransacionValid: isTransacionValid,
-      selectedTags: selectedTags,
-      allTags: MockList.tagList,
-    );
+    return getStateWithTags();
   }
 
   CreateTransactionState removeTag(TagModel tagModel) {
     selectedTags.remove(tagModel);
 
-    return CreateTransactionWithTags(
-      isTransacionValid: isTransacionValid,
-      selectedTags: selectedTags,
-      allTags: MockList.tagList,
-    );
+    return getStateWithTags();
   }
 
   CreateTransactionState addTag(TagModel tagModel) {
@@ -80,33 +84,33 @@ class CreateTransactionBloc
       selectedTags.add(tagModel);
     }
 
-    return CreateTransactionWithTags(
-      isTransacionValid: isTransacionValid,
-      selectedTags: selectedTags,
-      allTags: MockList.tagList,
-    );
+    return getStateWithTags();
   }
 
   CreateTransactionState updateValue(double _value) {
     value = _value;
 
-    return CreateTransactionWithTags(
-      isTransacionValid: isTransacionValid,
-      selectedTags: selectedTags,
-      allTags: MockList.tagList,
-    );
+    return getStateWithTags();
   }
 
   CreateTransactionState updateObservation(String _observation) {
     observation = _observation;
-    return CreateTransactionWithTags(
-      isTransacionValid: isTransacionValid,
-      selectedTags: selectedTags,
-      allTags: MockList.tagList,
-    );
+    return getStateWithTags();
+  }
+
+  CreateTransactionState updateTransactionType(TransactionTypes _transactionType){
+    transactionType = _transactionType;
+    return getStateWithTags();
   }
 
   CreateTransactionState saveTransaction() {
+    if (!isTransactionValid) {
+      return getStateWithTags(
+        typeValidation: getTypeValidation(),
+        tagValidation: getTagsValidation(),
+      );
+    }
+
     final transaction = TransactionModel(
       observation: observation,
       primaryTag: selectedTags.first,
@@ -114,8 +118,27 @@ class CreateTransactionBloc
       value: value,
     );
 
-    print(transaction);
-    
     return CreateTransactionSuccess();
+  }
+
+  CreateTransactionWithTags getStateWithTags({
+    String? typeValidation,
+    String? tagValidation,
+  }) {
+    return CreateTransactionWithTags(
+      selectedTags: selectedTags,
+      allTags: MockList.tagList,
+      typeValidation: typeValidation,
+      tagValidation: tagValidation,
+    );
+  }
+
+  String? getTypeValidation() {
+    return Validator.validateTransactionType(transactionType);
+  }
+
+  //todo talvez retirar
+  String? getTagsValidation() {
+    return Validator.validateTagList(selectedTags);
   }
 }

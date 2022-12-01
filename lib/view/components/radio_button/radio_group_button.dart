@@ -8,13 +8,17 @@ class RadioButtonGroup extends StatelessWidget {
     Key? key,
     required this.radioButtonList,
     required this.controller,
+    required void Function(Enum)? onChange,
   }) : super(key: key) {
     for (RadioButton radioButton in radioButtonList) {
       radioButton.setController(controller);
     }
+
+    controller.setOnChange(onChange);
   }
   final List<RadioButton> radioButtonList;
   final RadioButtonGroupControllerBloc controller;
+  
 
   @override
   Widget build(BuildContext context) {

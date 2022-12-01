@@ -26,7 +26,8 @@ class ThemeConstant {
   static const borderRadiusButtonTag = 16.0;
 
   static const tagSelectorBoxWeight = 300.0;
-// const TAG_SELECTOR_BOX_HEIGHT = 16.0;
+
+  static const buttonBorderWidth = 2.0;
 
   static const moneySimpleText = TextStyle(
     fontSize: 20,

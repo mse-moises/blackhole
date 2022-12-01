@@ -18,7 +18,7 @@ class TransactionTile extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.attach_money),
       title: Text(transactionModel.value.toString()),
-      subtitle: Text(transactionModel.observation),
+      subtitle: Text(transactionModel.observation ?? ""),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,

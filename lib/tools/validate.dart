@@ -1,4 +1,5 @@
 import 'package:blackhole/const/const_business_rules.dart';
+import 'package:blackhole/models/tag_model.dart';
 import 'package:blackhole/tools/converters.dart';
 import 'package:flutter/material.dart';
 
@@ -18,5 +19,14 @@ class Validator {
     double value = Converters.moneyStringToDouble(_value ?? "");
     if (value <= 0) return "Invalid value";
     return null;
+  }
+
+  //TODO VERIFICAR SE TEM MEMO Q TE VO PENSA
+  static String? validateTagList(List<TagModel> tags){
+    if(tags.isEmpty) return "Has to have some tag";
+  }
+
+  static String? validateTransactionType(TransactionTypes? transactionTypes){
+    if(transactionTypes == null) return "Has to have a type";
   }
 }

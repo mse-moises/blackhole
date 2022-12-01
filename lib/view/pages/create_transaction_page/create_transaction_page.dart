@@ -10,6 +10,7 @@ import 'package:blackhole/view/components/radio_button/radio_button.dart';
 import 'package:blackhole/view/components/radio_button/radio_group_button.dart';
 import 'package:blackhole/view/components/tag_component.dart';
 import 'package:blackhole/view/components/text_field_money.dart';
+import 'package:blackhole/view/components/validation_text.dart';
 import 'package:blackhole/view/pages/create_transaction_page/bloc/create_transaction_bloc.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
@@ -52,11 +53,30 @@ class CreateTransactionPage extends StatelessWidget {
     bloc.add(CreateTransactionRequestSaveTransaction());
   }
 
+  void onChange(Enum transactionType) {
+    if (transactionType is TransactionTypes) {
+      bloc.add(
+        CreateTransactionRequestUpdateTransactionType(
+          transactionType: transactionType,
+        ),
+      );
+    }
+  }
+
+  void popNavigator(BuildContext context){
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: bloc,
-      child: BlocBuilder<CreateTransactionBloc, CreateTransactionState>(
+      child: BlocConsumer<CreateTransactionBloc, CreateTransactionState>(
+        listener: (context, state) {
+          if(state is CreateTransactionSuccess){
+            popNavigator(context);
+          }
+        },
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
@@ -75,38 +95,55 @@ class CreateTransactionPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _FieldTitle(
+                        const _FieldTitle(
                           title: "type",
                         ),
                         _FieldWithPadding(
-                          child: _TransactionType(controller: radioGroupController,),
+                          children: [
+                            _TransactionType(
+                              controller: radioGroupController,
+                              onChange: onChange,
+                            ),
+                            ValidationText(
+                              title: state.typeValidation,
+                            ),
+                          ],
                         ),
-                        _FieldTitle(
+                        const _FieldTitle(
                           title: "value",
                         ),
                         _FieldWithPadding(
-                          child: TextFieldMoney(
-                            validator: Validator.validateMoneyForm,
-                            onChange: updateValue,
-                          ),
+                          children: [
+                            TextFieldMoney(
+                              validator: Validator.validateMoneyForm,
+                              onChange: updateValue,
+                            ),
+                          ],
                         ),
                         const _FieldTitle(
                           title: "observation",
                         ),
                         _FieldWithPadding(
-                          child: TextFormField(
-                            validator: Validator.validateObservationForm,
-                            onChanged: updateObservation,
-                          ),
+                          children: [
+                            TextFormField(
+                              validator: Validator.validateObservationForm,
+                              onChanged: updateObservation,
+                            ),
+                          ],
                         ),
                         const _FieldTitle(
                           title: "tags",
                         ),
                         _FieldWithPadding(
-                          child: _TagsField(
-                            removeTag: removeTag,
-                            addTag: addTag,
-                          ),
+                          children: [
+                            _TagsField(
+                              removeTag: removeTag,
+                              addTag: addTag,
+                            ),
+                            ValidationText(
+                              title: state.tagValidation,
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -142,9 +179,9 @@ class _FieldTitle extends StatelessWidget {
 }
 
 class _FieldWithPadding extends StatelessWidget {
-  const _FieldWithPadding({Key? key, required this.child}) : super(key: key);
+  const _FieldWithPadding({Key? key, required this.children}) : super(key: key);
 
-  final Widget child;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +191,9 @@ class _FieldWithPadding extends StatelessWidget {
         top: ThemeConstant.mediumSpace,
         bottom: ThemeConstant.largeSpace,
       ),
-      child: child,
+      child: Column(
+        children: children,
+      ),
     );
   }
 }
@@ -306,13 +345,10 @@ class _FloatingActionButtonSend extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CreateTransactionBloc, CreateTransactionState>(
       builder: (context, state) {
-        bool isValid =
-            (state is CreateTransactionWithTags) && state.isTransacionValid;
-
         return FloatingActionButton.extended(
           heroTag: 'FloatingActionButton',
           label: Row(
-            children: [
+            children: const [
               Text('Save'),
               SizedBox(
                 width: ThemeConstant.smallSpace,
@@ -328,26 +364,34 @@ class _FloatingActionButtonSend extends StatelessWidget {
 }
 
 class _TransactionType extends StatelessWidget {
-  const _TransactionType({Key? key, required this.controller}) : super(key: key);
+  const _TransactionType(
+      {Key? key, required this.controller, required this.onChange})
+      : super(key: key);
 
   final RadioButtonGroupControllerBloc controller;
 
+  final void Function(Enum)? onChange;
+
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      RadioButtonGroup(
-        controller: controller,
-        radioButtonList: [
-          RadioButton(
-            value: TransactionTypes.moneyIn,
-            title: "in",
-          ),
-          RadioButton(
-            value: TransactionTypes.moneyOut,
-            title: "out",
-          ),
-        ],
-      ),
-    ]);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        RadioButtonGroup(
+          controller: controller,
+          onChange: onChange,
+          radioButtonList: [
+            RadioButton(
+              value: TransactionTypes.moneyIn,
+              title: "in",
+            ),
+            RadioButton(
+              value: TransactionTypes.moneyOut,
+              title: "out",
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

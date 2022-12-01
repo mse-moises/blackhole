@@ -32,5 +32,11 @@ class CreateTransactionRequestUpdateObservation
   CreateTransactionRequestUpdateObservation({required this.observation});
 }
 
+class CreateTransactionRequestUpdateTransactionType implements CreateTransactionEvent{
+  final TransactionTypes transactionType;
+
+  CreateTransactionRequestUpdateTransactionType({required this.transactionType});
+}
+
 class CreateTransactionRequestSaveTransaction
     implements CreateTransactionEvent {}
