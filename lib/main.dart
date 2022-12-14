@@ -1,6 +1,8 @@
 import 'package:blackhole/const/const_theme.dart';
+import 'package:blackhole/models/transaction_model.dart';
 import 'package:blackhole/view/pages/create_transaction_page/create_transaction_page.dart';
 import 'package:blackhole/view/pages/home_page/home_page.dart';
+import 'package:blackhole/view/pages/transaction_page/transaction_page.dart';
 import 'package:flutter/material.dart';
 
 import 'initial_configs.dart';
@@ -26,10 +28,14 @@ class MyApp extends StatelessWidget {
         //   headline2: CONST_H2_THEME,
         // ),
       ),
-      initialRoute: '/',
+      initialRoute: HomePage.route,
       routes: {
-        HomePage.route: (context) => HomePage(),
-        CreateTransactionPage.route: (context) => CreateTransactionPage(),
+        HomePage.route: (_) => HomePage(),
+        CreateTransactionPage.route: (_) => CreateTransactionPage(),
+        TransactionPage.route: (context) => TransactionPage(
+              transactionModel: ModalRoute.of(context)!.settings.arguments
+                  as TransactionModel,
+            ),
       },
     );
   }

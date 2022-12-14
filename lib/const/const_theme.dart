@@ -29,6 +29,8 @@ class ThemeConstant {
 
   static const buttonBorderWidth = 2.0;
 
+  static const thinBorderWidth = 1.0;
+
   static const moneySimpleText = TextStyle(
     fontSize: 20,
     color: Colors.black,

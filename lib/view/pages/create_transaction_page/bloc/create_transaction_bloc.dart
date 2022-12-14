@@ -2,6 +2,7 @@ import 'package:blackhole/const/const_business_rules.dart';
 import 'package:blackhole/mock/mock_list.dart';
 import 'package:blackhole/models/tag_model.dart';
 import 'package:blackhole/models/transaction_model.dart';
+import 'package:blackhole/repository/transaction_repository_interface.dart';
 import 'package:blackhole/tools/validate.dart';
 
 import 'package:bloc/bloc.dart';
@@ -13,7 +14,7 @@ part 'create_transaction_state.dart';
 class CreateTransactionBloc
     extends Bloc<CreateTransactionEvent, CreateTransactionState> {
 
-
+  final TransactionRepositoryInterface repository;
 
   final List<TagModel> selectedTags = [];
   double value = 0.0;
@@ -25,7 +26,7 @@ class CreateTransactionBloc
     return getTypeValidation() == null && getTagsValidation() == null;
   }
 
-  CreateTransactionBloc() : super(CreateTransactionInitialWithoutTags()) {
+  CreateTransactionBloc({required this.repository}) : super(CreateTransactionInitialWithoutTags()) {
     on<CreateTransactionEvent>((event, emit) async {
       if (event is CreateTransactionRequestLoadTags) {
         emit(await getAllTags());
@@ -56,7 +57,7 @@ class CreateTransactionBloc
       }
 
       if (event is CreateTransactionRequestSaveTransaction) {
-        emit(saveTransaction());
+        emit(await saveTransaction());
       }
     });
 
@@ -103,7 +104,7 @@ class CreateTransactionBloc
     return getStateWithTags();
   }
 
-  CreateTransactionState saveTransaction() {
+  Future<CreateTransactionState> saveTransaction() async {
     if (!isTransactionValid) {
       return getStateWithTags(
         typeValidation: getTypeValidation(),
@@ -117,6 +118,8 @@ class CreateTransactionBloc
       tags: selectedTags,
       value: value,
     );
+
+    final response = await repository.addTransaction(transaction);
 
     return CreateTransactionSuccess();
   }
